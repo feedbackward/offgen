@@ -2,13 +2,6 @@
 
 A visual "explainer" notebook for learning criteria as an additional degree of freedom in our machine learning methodology (presented at [VISxAI 2025](https://visxai.io/)) by Matthew J. Holland.
 
-## If you just want to read the notebook
-
-Feel free to just read through [the notebook as-is on GitHub](https://github.com/feedbackward/offgen/blob/main/offgen/explainer-static.ipynb). Here is a brief introduction to it.
-
-In machine learning, losses (or rewards) are the fundamental source of data-driven *feedback* that make learning algorithms work. Much of the research literature, both theoretical and applied, is centered around the design of *loss functions* (input: model candidate and data point, output: real value), with the tacit assumption that at training time, *individual losses will be summed* over to construct a final objective function to be optimized. This approach is the bedrock of traditional machine learning (also called empirical risk minimization), but the choice of summing or averaging over losses leads to tradeoffs (e.g., poor worst-case performance, weak high-probability guarantees, issues with fairness or privacy, etc.), meaning that naively averaging over losses might not lead to the outcomes we hope for at test time.
-
-
 ## Interactive notebook
 
 Launch the interactive version in your browser (no install needed):
@@ -16,6 +9,13 @@ Launch the interactive version in your browser (no install needed):
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/feedbackward/offgen/ddcf7c0f34ab4534160c5161adaeacb340137677?urlpath=lab%2Ftree%2Foffgen%2Fexplainer.ipynb)
 
 In section 2, there are sliders which can be used to interactively change the data being generated; run the relevant cells at the above link to see the sliders.
+
+
+## If you just want to read the notebook
+
+Feel free to just read through [the notebook as-is on GitHub](https://github.com/feedbackward/offgen/blob/main/offgen/explainer-static.ipynb). Here is a brief introduction to it.
+
+In machine learning, losses (or rewards) are the fundamental source of data-driven *feedback* that make learning algorithms work. Much of the research literature, both theoretical and applied, is centered around the design of *loss functions* (input: model candidate and data point, output: real value), with the tacit assumption that at training time, *individual losses will be summed* over to construct a final objective function to be optimized. This approach is the bedrock of traditional machine learning (also called empirical risk minimization), but the choice of summing or averaging over losses leads to tradeoffs (e.g., poor worst-case performance, weak high-probability guarantees, issues with fairness or privacy, etc.), meaning that naively averaging over losses might not lead to the outcomes we hope for at test time.
 
 
 ### What is this explainer about?
