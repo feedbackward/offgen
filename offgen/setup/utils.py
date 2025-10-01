@@ -460,12 +460,18 @@ def gen_data(n, name, rg, **kwargs):
     Function for generating data.
     '''
     if name == "bernoulli":
-        prob = kwargs["prob"]
+        if len(kwargs) > 0:
+            prob = kwargs["prob"]
+        else:
+            prob = 0.30
         x = rg.uniform(low=0.0, high=1.0, size=(n,1))
         return np.where(x <= prob, 1.0, 0.0)
     elif name == "beta":
         a = 1.0
-        b = kwargs["b"]
+        if len(kwargs) > 0:
+            b = kwargs["b"]
+        else:
+            b = 0.5
         return rg.beta(a=a, b=b, size=(n,1))
     elif name == "chisquare":
         df = 3.5
@@ -481,10 +487,16 @@ def gen_data(n, name, rg, **kwargs):
         return rg.lognormal(mean=mean, sigma=sigma, size=(n,1))
     elif name == "normal":
         loc = 0.0
-        scale = kwargs["scale"]
+        if len(kwargs) > 0:
+            scale = kwargs["scale"]
+        else:
+            scale = 1.0
         return rg.normal(loc=loc, scale=scale, size=(n,1))
     elif name == "pareto":
-        a = kwargs["a"]
+        if len(kwargs) > 0:
+            a = kwargs["a"]
+        else:
+            a = 3.5
         return rg.pareto(a=a, size=(n,1))
     elif name == "uniform":
         low, high = (-0.5, 0.5)
@@ -691,7 +703,7 @@ def get_disp_barron(alpha, oneway=False):
         return lambda x: dispersion_barron(x=x, alpha=alpha)
 
 
-def make_criterion_plot(data, rg, criteria, data_kwargs, to_save=False, img_name=None, img_path=None):
+def make_criterion_plot(data, rg, criteria, data_kwargs={}, to_save=False, img_name=None, img_path=None):
     
     # Clerical parameters.
     n = 10000
@@ -915,7 +927,7 @@ def make_criterion_plot(data, rg, criteria, data_kwargs, to_save=False, img_name
     plt.show()
 
 
-def make_trisk_plot(data, rg, data_kwargs, to_save=False, img_name=None, img_path=None):
+def make_trisk_plot(data, rg, data_kwargs={}, to_save=False, img_name=None, img_path=None):
     
     # Clerical parameters.
     criteria = ["trisk_alpha", "trisk_sigma", "trisk_etatilde"]
@@ -1536,10 +1548,10 @@ def _dist_param_spec(data):
         return "prob", dict(cls="FloatSlider", value=0.30, min=0.25, max=0.75, step=0.05, description="mean")
     if data == "beta":
         return "b", dict(cls="FloatSlider", value=0.5, min=0.1, max=3.5, step=0.1, description="shape")
-    if data == "pareto":
-        return "a", dict(cls="FloatSlider", value=3.5, min=3.25, max=10.0, step=0.25, description="shape")
     if data == "normal":
         return "scale", dict(cls="FloatSlider", value=1.0, min=0.1, max=5.0, step=0.1, description="scale")
+    if data == "pareto":
+        return "a", dict(cls="FloatSlider", value=3.5, min=3.25, max=10.0, step=0.25, description="shape")
     raise ValueError("Unsupported data distribution!")
 
 def _build_slider(spec):
@@ -1584,19 +1596,6 @@ def interactive_criterion_plot(data, rg, criteria):
     slider.observe(_draw, names="value")
     _draw() # initial render
 
-    # Final bit to ensure things look okay in static in GitHub viewer.
-    try:
-        fig = make_criterion_plot(
-            data=data, rg=rg, criteria=criteria,
-            data_kwargs={param_name: slider.value}, **(static_kwargs or {})
-        )
-        if fig is not None:
-            display(fig)
-        else:
-            plt.show()
-    except Exception:
-        pass
-
 
 def interactive_trisk_plot(data, rg):
     '''
@@ -1631,19 +1630,6 @@ def interactive_trisk_plot(data, rg):
                 plt.show()
     slider.observe(_draw, names="value")
     _draw() # initial render
-
-    # Final bit to ensure things look okay in static in GitHub viewer.
-    try:
-        fig = make_criterion_plot(
-            data=data, rg=rg, criteria=criteria,
-            data_kwargs={param_name: slider.value}, **(static_kwargs or {})
-        )
-        if fig is not None:
-            display(fig)
-        else:
-            plt.show()
-    except Exception:
-        pass
 
 
 ###############################################################################
