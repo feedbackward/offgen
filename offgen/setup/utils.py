@@ -1584,6 +1584,19 @@ def interactive_criterion_plot(data, rg, criteria):
     slider.observe(_draw, names="value")
     _draw() # initial render
 
+    # Final bit to ensure things look okay in static in GitHub viewer.
+    try:
+        fig = make_criterion_plot(
+            data=data, rg=rg, criteria=criteria,
+            data_kwargs={param_name: slider.value}, **(static_kwargs or {})
+        )
+        if fig is not None:
+            display(fig)
+        else:
+            plt.show()
+    except Exception:
+        pass
+
 
 def interactive_trisk_plot(data, rg):
     '''
@@ -1592,7 +1605,7 @@ def interactive_trisk_plot(data, rg):
     '''
     if ipw is None:
         raise RuntimeError("ipywidgets is not available. Please `pip install ipywidgets`.")
-
+    
     param_name, spec = _dist_param_spec(data)
     slider = _build_slider(spec)
 
@@ -1618,6 +1631,19 @@ def interactive_trisk_plot(data, rg):
                 plt.show()
     slider.observe(_draw, names="value")
     _draw() # initial render
+
+    # Final bit to ensure things look okay in static in GitHub viewer.
+    try:
+        fig = make_criterion_plot(
+            data=data, rg=rg, criteria=criteria,
+            data_kwargs={param_name: slider.value}, **(static_kwargs or {})
+        )
+        if fig is not None:
+            display(fig)
+        else:
+            plt.show()
+    except Exception:
+        pass
 
 
 ###############################################################################
