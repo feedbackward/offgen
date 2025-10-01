@@ -28,7 +28,7 @@ The notebook is divided into three main sections.
 2. Quantifying and visualizing learning criteria
 3. Fundamental limitations
 
-The first section uses a simple one-variable linear regression task as an example to highlight the distinct nature of "loss function design" and "learning criterion design". In section 2, we then take detailed look at important classes of learning criteria, with lots of visual aids. Section 3 is slightly more advanced, and highlights unavoidable tradeoffs and potential pitfalls that arise when designing criteria. All the code for generating figures is available in this repository, and can be easily customized and modified.
+The first section uses a simple one-variable linear regression task as an example to highlight the distinct nature of "loss function design" and "learning criterion design". In section 2, we then take detailed a look at important classes of learning criteria, with lots of visual aids. Section 3 is slightly more advanced, and highlights unavoidable tradeoffs and potential pitfalls that arise when designing criteria. All the code for generating figures is available in this repository, and can be easily customized and modified.
 
 ### Who should read this?
 
@@ -39,7 +39,7 @@ We hope that anyone with an interest in the methodology of modern machine learni
 
 We use just a few standard libraries, very easy to prepare. For completeness, here we give a typical flow for setting things up.
 
-Assuming that the user has cloned this reposiory and thus has the `offgen` directory somewhere on disk, let's set up a virtual environment within our project.
+Assuming that the user has cloned this repository and thus has the `offgen` directory somewhere on disk, let's set up a virtual environment within our project.
 
 ```
 cd [path]/offgen
