@@ -1,6 +1,8 @@
 '''Setup: various handy utilities.'''
 
 # External modules.
+import ipywidgets as ipw
+from IPython.display import display, clear_output
 from matplotlib import cm
 from matplotlib.colors import BoundaryNorm
 import matplotlib.pyplot as plt
@@ -453,16 +455,17 @@ def get_dispersion_autoset(name, **kwargs):
     return (dispersion, dispersion_d1)
 
 
-def gen_data(n, name, rg):
+def gen_data(n, name, rg, **kwargs):
     '''
     Function for generating data.
     '''
     if name == "bernoulli":
-        prob = 0.25
+        prob = kwargs["prob"]
         x = rg.uniform(low=0.0, high=1.0, size=(n,1))
         return np.where(x <= prob, 1.0, 0.0)
     elif name == "beta":
-        a, b = (1.0, 0.5)
+        a = 1.0
+        b = kwargs["b"]
         return rg.beta(a=a, b=b, size=(n,1))
     elif name == "chisquare":
         df = 3.5
@@ -477,10 +480,11 @@ def gen_data(n, name, rg):
         mean, sigma = (0.0, 0.5)
         return rg.lognormal(mean=mean, sigma=sigma, size=(n,1))
     elif name == "normal":
-        loc, scale = (0.0, 1.0)
+        loc = 0.0
+        scale = kwargs["scale"]
         return rg.normal(loc=loc, scale=scale, size=(n,1))
     elif name == "pareto":
-        a = 3.5
+        a = kwargs["a"]
         return rg.pareto(a=a, size=(n,1))
     elif name == "uniform":
         low, high = (-0.5, 0.5)
@@ -687,7 +691,7 @@ def get_disp_barron(alpha, oneway=False):
         return lambda x: dispersion_barron(x=x, alpha=alpha)
 
 
-def make_criterion_plot(data, rg, criteria, to_save=False, img_name=None, img_path=None):
+def make_criterion_plot(data, rg, criteria, data_kwargs, to_save=False, img_name=None, img_path=None):
     
     # Clerical parameters.
     n = 10000
@@ -773,7 +777,7 @@ def make_criterion_plot(data, rg, criteria, to_save=False, img_name=None, img_pa
     sol_values = { crit: {} for crit in criteria }
     
     # Get basic statistics of the data distribution.
-    x_values = gen_data(n=n, name=data, rg=rg)
+    x_values = gen_data(n=n, name=data, rg=rg, **data_kwargs)
     x_values = x_values - np.mean(x_values) # center the data, so we get positive and negative values.
     if flip_data:
         x_values = -x_values # flip the signs if desired.
@@ -911,7 +915,7 @@ def make_criterion_plot(data, rg, criteria, to_save=False, img_name=None, img_pa
     plt.show()
 
 
-def make_trisk_plot(data, rg, to_save=False, img_name=None, img_path=None):
+def make_trisk_plot(data, rg, data_kwargs, to_save=False, img_name=None, img_path=None):
     
     # Clerical parameters.
     criteria = ["trisk_alpha", "trisk_sigma", "trisk_etatilde"]
@@ -966,7 +970,7 @@ def make_trisk_plot(data, rg, to_save=False, img_name=None, img_path=None):
     sol_values = { crit: {} for crit in criteria }
     
     # Get basic statistics of the data distribution.
-    x_values = gen_data(n=n, name=data, rg=rg)
+    x_values = gen_data(n=n, name=data, rg=rg, **data_kwargs)
     x_values = x_values - np.mean(x_values) # center the data, so we get positive and negative values.
     if flip_data:
         x_values = -x_values # flip the signs if desired.
@@ -1522,6 +1526,98 @@ def makedir_safe(dirname: str) -> None:
     if not os.path.exists(dirname):
         os.makedirs(dirname)
     return None
+
+
+def _dist_param_spec(data):
+    '''
+    Map distribution name -> (generator kwarg, slider spec)
+    '''
+    if data == "bernoulli":
+        return "prob", dict(cls="FloatSlider", value=0.30, min=0.25, max=0.75, step=0.05, description="mean")
+    if data == "beta":
+        return "b", dict(cls="FloatSlider", value=0.5, min=0.1, max=3.5, step=0.1, description="shape")
+    if data == "pareto":
+        return "a", dict(cls="FloatSlider", value=3.5, min=3.25, max=10.0, step=0.25, description="shape")
+    if data == "normal":
+        return "scale", dict(cls="FloatSlider", value=1.0, min=0.1, max=5.0, step=0.1, description="scale")
+    raise ValueError("Unsupported data distribution!")
+
+def _build_slider(spec):
+    if ipw is None:
+        raise RuntimeError("ipywidgets is not available. Please `pip install ipywidgets`.")
+    spec = spec.copy()
+    cls = spec.pop("cls")
+    return getattr(ipw, cls)(**spec)
+
+def interactive_criterion_plot(data, rg, criteria):
+    '''
+    Shows a single slider for the chosen data distribution and re-calls
+    make_criterion_plot(...) with `data_kwargs={param: slider.value}` on change.
+    '''
+    if ipw is None:
+        raise RuntimeError("ipywidgets is not available. Please `pip install ipywidgets`.")
+
+    param_name, spec = _dist_param_spec(data)
+    slider = _build_slider(spec)
+
+    # Dedicated output area just for the figure.
+    out = ipw.Output()
+
+    # Layout and drawing function.
+    ui = ipw.VBox([slider, out])
+    display(ui)
+    def _draw(_=None):
+        with out:
+            out.clear_output(wait=True)
+            fig = make_criterion_plot(
+                data=data,
+                rg=rg,
+                criteria=criteria,
+                data_kwargs={param_name: slider.value}
+            )
+            # Ensure something is displayed. If make_criterion_plot draws inline,
+            # calling plt.show() is still safe; if it returns a fig, display it.
+            if fig is not None:
+                display(fig)
+            else:
+                plt.show()
+    slider.observe(_draw, names="value")
+    _draw() # initial render
+
+
+def interactive_trisk_plot(data, rg):
+    '''
+    Shows a single slider for the chosen data distribution and re-calls
+    make_criterion_plot(...) with `data_kwargs={param: slider.value}` on change.
+    '''
+    if ipw is None:
+        raise RuntimeError("ipywidgets is not available. Please `pip install ipywidgets`.")
+
+    param_name, spec = _dist_param_spec(data)
+    slider = _build_slider(spec)
+
+    # Dedicated output area just for the figure.
+    out = ipw.Output()
+
+    # Layout and drawing function.
+    ui = ipw.VBox([slider, out])
+    display(ui)
+    def _draw(_=None):
+        with out:
+            out.clear_output(wait=True)
+            fig = make_trisk_plot(
+                data=data,
+                rg=rg,
+                data_kwargs={param_name: slider.value}
+            )
+            # Ensure something is displayed. If make_criterion_plot draws inline,
+            # calling plt.show() is still safe; if it returns a fig, display it.
+            if fig is not None:
+                display(fig)
+            else:
+                plt.show()
+    slider.observe(_draw, names="value")
+    _draw() # initial render
 
 
 ###############################################################################

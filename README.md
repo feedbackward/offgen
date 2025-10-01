@@ -45,6 +45,7 @@ source ./venv/bin/activate
 (venv) pip3 install matplotlib
 (venv) pip3 install scipy
 (venv) pip3 install -U scikit-learn
+(venv) pip3 install ipywidgets
 ```
 
 Once this is all in place, all that remains is to run the Jupyter notebook.
